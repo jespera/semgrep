@@ -110,6 +110,7 @@ let tests (caps : Cap.all_caps) =
       (* End OSemgrep tests *)
       Spacegrep_tests.Test.tests ();
       Aliengrep.Unit_tests.tests;
+      Semgrep_spdiff.Tests.tests;
       Unit_core_json_output.tests;
       Test_core_CLI.tests (caps :> Cap.all_caps);
       (* Inline tests *)

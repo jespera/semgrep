@@ -25,6 +25,7 @@
     semgrep.engine.tests
     semgrep.data
     semgrep_rpc
+    semgrep.spdiff
 
     ; experiments
     semgrep.synthesizing

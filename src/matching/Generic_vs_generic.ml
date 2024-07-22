@@ -3769,8 +3769,7 @@ and m_normalized_imports a b =
 and m_item a b = m_stmt a b
 
 and m_program a b =
-  match (a, b) with
-  | a, b -> (m_list m_item) a b
+  (m_list m_item) a b
 
 (*****************************************************************************)
 (* Any *)

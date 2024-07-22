@@ -1,0 +1,7 @@
+(library
+ (public_name semgrep.spdiff)
+ (name semgrep_spdiff)
+ (libraries
+  ast_generic
+ )
+)

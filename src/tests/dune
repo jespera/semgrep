@@ -34,6 +34,8 @@
     osemgrep_cli_login
     osemgrep_cli_publish
     semgrep.osemgrep_tests
+    
+    semgrep_spdiff
   )
  (modes native byte) ; bytecode here for debugging
  (preprocess

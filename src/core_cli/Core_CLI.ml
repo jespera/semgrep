@@ -213,6 +213,36 @@ let dump_ast ?(naming = false) (caps : < Cap.stdout ; Cap.exit >)
         Core_exit_code.(exit_semgrep caps#exit False)))
 [@@action]
 
+(* let dump_ast_raw (caps : < Cap.stdout; Cap.exit >) (res: Parsing_result2.t) =
+  let v = Meta_AST.vof_any (AST_generic.Pr res.ast) in
+  (* 80 columns is too little *)
+  Format.set_margin 200;
+  let s = dump_v_to_format v in
+  CapConsole.print caps#stdout s;
+  if Parsing_result2.has_error res then (
+    Core_exit_code.(exit_semgrep caps#exit False)) *)
+
+let spdiff (caps : < Cap.stdout; Cap.exit; Cap.tmp >) (lang : Language.t) (file: Fpath.t) =
+  let file = Core_scan.replace_named_pipe_by_regular_file (caps :> < Cap.tmp >) file in
+  let line_datas =
+    In_channel.with_open_bin !!file In_channel.input_all
+    |> String.split_on_char '\n'
+    |> List.map (String.split_on_char ' ')
+  in
+    List.iter (fun files ->
+      if (List.length files =|= 2)
+      then begin
+        let old_file = List.nth files 0 |> Fpath.v in
+        let new_file = List.nth files 1 |> Fpath.v in
+        CapConsole.print caps#stdout (List.nth files 0 ^ "->" ^ List.nth files 1);
+        let old_ast = Parse_target.just_parse_with_lang lang old_file in
+        let new_ast = Parse_target.just_parse_with_lang lang new_file in
+        let rew = Semgrep_spdiff.Spdiff.rewrites old_ast.ast new_ast.ast in
+        print_endline ("done " ^ (Int.to_string (List.length rew)))
+      end
+    ) line_datas
+[@@action]
+
 (*****************************************************************************)
 (* Experiments *)
 (*****************************************************************************)
@@ -417,6 +447,11 @@ let all_actions (caps : Cap.all_caps) () =
              (caps :> < Cap.stdout ; Cap.exit >)
              (Xlang.lang_of_opt_xlang_exn !lang))
           file );
+    ( "-diffsum",
+      " <specfile>",
+      fun specfile ->
+        Arg_.mk_action_1_conv Fpath.v
+        (spdiff (caps :> < Cap.stdout ; Cap.exit; Cap.tmp >) (Xlang.lang_of_opt_xlang_exn !lang)) specfile);
     ( "-dump_lang_ast",
       " <file>",
       fun file ->
