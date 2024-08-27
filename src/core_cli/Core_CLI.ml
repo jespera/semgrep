@@ -233,7 +233,7 @@ let diffsum (caps : < Cap.stdout; Cap.exit; Cap.tmp >) (lang : Language.t) (file
       then begin
         let old_file = List.nth files 0 |> Fpath.v in
         let new_file = List.nth files 1 |> Fpath.v in
-        CapConsole.print caps#stdout (List.nth files 0 ^ "->" ^ List.nth files 1);
+        CapConsole.print caps#stdout (List.nth files 0 ^ " -> " ^ List.nth files 1);
         let old_ast = Parse_target.just_parse_with_lang lang old_file in
         let new_ast = Parse_target.just_parse_with_lang lang new_file in
         let rew = Semgrep_spdiff.Spdiff.rewrites old_ast.ast new_ast.ast in

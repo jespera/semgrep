@@ -1,7 +1,6 @@
 type rewrite
   = Pexpr of { lhs : AST_generic.expr; rhs : AST_generic.expr }
 
-
 (**
 Basic dist/rewrites function skeleton:
 
@@ -32,24 +31,45 @@ else (c(ts)->c'(ts')) : rewrites_list(ts, ts')
 
 rewrites_list([], []) = []
 rewrites_list(ts, ts') =
-  - in principle the simple thing to do is to just do the cartesian 
+  - in principle the simple thing to do is to just do the cartesian
     product of terms but it's easy to see how that would be way too
     large and perhaps most of the time also "wrong"
     (we don't have safety defined so we have to produce good guesses)
   - given ts and ts' produce the smallest pairing; i.e. pairs of elements
-    from ts and ts'
-    
+    from ts and ts';
+
+    given ts and ts' as follows
+
     1 f(42) 4
     1 f(117) 3
-    
+
     =1 f(42)->f(117) 4->3
     0  2             2     = 4
+
     which is better than
     =1 -f(42) +f(117) -4+3
     0   2      2       1 1 = 6
+
+    Example 2:
+
+    f(42) 1 117
+    g(52) f(10) 118
+
+    Option1:
+    +g(52) f(42)->f(10) -1 +118 -117
+    2      2             1  1    1 = 7
+
+    Option2:
+    f(42)->g(52) 1->f(10) -117 +188
+    3            3         1    1    = 8
 *)
 
-let rec expr_kind_size (src: AST_generic.expr_kind) =
+
+(* TODO[ja] It cannot be the case that this function does not have
+   a way to be derived automatically *)
+let rec expr_size (src: AST_generic.expr) =
+  expr_kind_size src.e
+and expr_kind_size (src: AST_generic.expr_kind) =
   match src with
   | L _ -> 1
   | Container (_containerOp, (_, exps, _)) ->
@@ -57,8 +77,39 @@ let rec expr_kind_size (src: AST_generic.expr_kind) =
       (fun acc (exp: AST_generic.expr) -> acc + expr_kind_size exp.e)
       1
       exps
-  | _ -> 0 (*TODO[ja] for now we pretend it's done; perhaps I should
-  take a look at the vistitors since it's really tedious to write this code *)
+  | Comprehension (_, (_, (e, _for_or), _)) -> 1 + expr_size e (* TODO: for_or size*)
+  | Record _
+  | Constructor _
+  | RegexpTemplate _
+  | N _
+  | IdSpecial _
+  | Call _
+  | New _
+  | Xml _
+  | Assign _
+  | AssignOp _
+  | LetPattern _
+  | DotAccess _
+  | ArrayAccess _
+  | SliceAccess _
+  | Lambda _
+  | AnonClass _
+  | Conditional _
+  | Yield _
+  | Await _
+  | Cast _
+  | Seq _
+  | Ref _
+  | DeRef _
+  | Alias _
+  | Ellipsis _
+  | DeepEllipsis _
+  | DisjExpr _
+  | TypedMetavar _
+  | DotAccessEllipsis _
+  | StmtExpr _
+  | OtherExpr _
+  | RawExpr _ -> 0
 
 let _expr_kind_dist (src: AST_generic.expr_kind) (tgt: AST_generic.expr_kind) =
   match src, tgt with
