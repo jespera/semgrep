@@ -222,8 +222,7 @@ let dump_ast ?(naming = false) (caps : < Cap.stdout ; Cap.exit >)
   if Parsing_result2.has_error res then (
     Core_exit_code.(exit_semgrep caps#exit False)) *)
 
-let spdiff (caps : < Cap.stdout; Cap.exit; Cap.tmp >) (lang : Language.t) (file: Fpath.t) =
-  let file = Core_scan.replace_named_pipe_by_regular_file (caps :> < Cap.tmp >) file in
+let diffsum (caps : < Cap.stdout; Cap.exit; Cap.tmp >) (lang : Language.t) (file: Fpath.t) =
   let line_datas =
     In_channel.with_open_bin !!file In_channel.input_all
     |> String.split_on_char '\n'
@@ -451,7 +450,7 @@ let all_actions (caps : Cap.all_caps) () =
       " <specfile>",
       fun specfile ->
         Arg_.mk_action_1_conv Fpath.v
-        (spdiff (caps :> < Cap.stdout ; Cap.exit; Cap.tmp >) (Xlang.lang_of_opt_xlang_exn !lang)) specfile);
+        (diffsum (caps :> < Cap.stdout ; Cap.exit; Cap.tmp >) (Xlang.lang_of_opt_xlang_exn !lang)) specfile);
     ( "-dump_lang_ast",
       " <file>",
       fun file ->

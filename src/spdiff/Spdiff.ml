@@ -60,7 +60,7 @@ let rec expr_kind_size (src: AST_generic.expr_kind) =
   | _ -> 0 (*TODO[ja] for now we pretend it's done; perhaps I should
   take a look at the vistitors since it's really tedious to write this code *)
 
-let expr_kind_dist (src: AST_generic.expr_kind) (tgt: AST_generic.expr_kind) =
+let _expr_kind_dist (src: AST_generic.expr_kind) (tgt: AST_generic.expr_kind) =
   match src, tgt with
   | _ when AST_generic.equal_expr_kind src tgt  -> 0
   | L _, L _ -> 1 (* TODO[ja] look inside literal value *)
