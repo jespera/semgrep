@@ -126,6 +126,8 @@ let str_of_info x = Tok.content_of_tok x
 (* not mentionned in this grammar. filtered in parse_php.ml *)
 %token <Tok.t> T_COMMENT T_DOC_COMMENT
 
+%token <Tok.t> T_FUNC_DOC_COMMENT
+
 (* when use preprocessor and want to mark removed tokens as commented *)
 %token <Tok.t> TCommentPP
 
@@ -559,15 +561,16 @@ function_declaration: ioption(attributes) unticked_function_declaration
    { { $2 with f_attrs = $1 } }
 
 unticked_function_declaration:
- async_opt T_FUNCTION is_reference ident type_params_opt
+ async_opt ioption(T_FUNC_DOC_COMMENT) T_FUNCTION is_reference ident type_params_opt
    "(" parameter_list ")"
    return_type? function_body
-   {  validate_parameter_list $7;
-      { f_tok = $2; f_ref = $3; f_name = Name $4; f_params = ($6, $7, $8);
-       f_tparams = $5;
-       f_return_type = $9; f_body = $10;
+   {  validate_parameter_list $8;
+      { f_tok = $3; f_ref = $4; f_name = Name $5; f_params = ($7, $8, $9);
+       f_tparams = $6;
+       f_return_type = $10; f_body = $11;
        f_attrs = None;
        f_type = FunctionRegular; f_modifiers = $1;
+       f_doc_comment = $2;
     } }
 
 function_body:
@@ -777,7 +780,7 @@ method_declaration:
        ({ f_tok = $2; f_ref = $3; f_name = Name $4; f_tparams = $5;
           f_params = ($6, $7, $8); f_return_type = $9;
           f_body = body; f_type = function_type; f_modifiers = $1;
-          f_attrs = None;
+          f_attrs = None; f_doc_comment = None; (* TODO *)
         })
      }
 
@@ -1025,6 +1028,7 @@ expr:
                      f_return_type = $8; f_type = FunctionLambda;
                      f_modifiers = $1;
                      f_attrs = None;
+                     f_doc_comment = None; (* TODO *)
        })
    }
  (* php-facebook-ext: lambda (short closure)s *)
