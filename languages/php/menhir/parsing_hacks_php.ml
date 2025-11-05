@@ -114,6 +114,14 @@ let rec is_variable toks =
   | T_VARIABLE _ :: _ -> true
   | x :: xs -> if TH.is_comment x then is_variable xs else false
 
+(* is the next whitespace token one that satisfies the given predicate *)
+let rec is_next_p p toks =
+  match toks with
+    | [] -> false
+    | x :: _ when p x -> true
+    | x :: xs when TH.is_whitespace x -> is_next_p p xs
+    | _ :: _ -> false
+
 (*
  * Find the next group of parenthesized tokens, being sure to balance parens.
  * Returns an empty list if the parens were imbalanced or the first non-comment
@@ -197,6 +205,15 @@ let fix_tokens xs =
     match xs with
     (* need an acc, to be tail recursive, otherwise get some stack overflow *)
     | [] -> List.rev acc
+    (* If the following token (when ignoring whitespace/comments) is a func_dec,
+       the doc_comment should be treated differently optionally *)
+    | T_DOC_COMMENT ii :: xs' ->
+        let new_acc =
+          if is_next_p (function T_FUNCTION _ -> true | _ -> false) xs'
+          then  (T_FUNC_DOC_COMMENT ii :: acc)
+          else T_DOC_COMMENT ii :: acc
+        in
+        aux env new_acc xs'
     (* '>>', maybe should be split in two tokens '>' '>' when in generic
      * context
      *)

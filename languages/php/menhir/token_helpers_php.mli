@@ -12,6 +12,7 @@
 *)
 val is_eof : Parser_php.token -> bool
 val is_comment : Parser_php.token -> bool
+val is_whitespace : Parser_php.token -> bool
 val is_just_comment : Parser_php.token -> bool
 val token_kind_of_tok : Parser_php.token -> Lib_ast_fuzzy.token_kind
 val info_of_tok : Parser_php.token -> Tok.t
